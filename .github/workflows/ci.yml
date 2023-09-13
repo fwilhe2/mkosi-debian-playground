@@ -1,0 +1,42 @@
+name: CI
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture:
+        - 'arm64'
+        - 'x86-64'
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Setup mkosi
+      uses: systemd/mkosi@v16
+
+    - name: Install qemu-utils for qemu-img
+      run: sudo apt-get update && sudo apt-get -y install qemu-utils
+
+    - name: Summary
+      run: |
+        sudo mkosi summary
+
+    - name: Build Image
+      run: |
+        sudo mkosi --architecture=${{ matrix.architecture }}
+
+    - name: Convert Image
+      run: qemu-img convert -f raw -O qcow2 image.raw debian-image-${{ matrix.architecture }}.qcow2
+
+    - name: Upload Image
+      uses: actions/upload-artifact@v3
+      with:
+        name: debian-image-${{ matrix.architecture }}
+        path: debian-image-${{ matrix.architecture }}.qcow2
