@@ -32,11 +32,11 @@ jobs:
       run: |
         sudo mkosi --root-password=toor --architecture=${{ matrix.architecture }}
 
-    - name: Convert Image
-      run: qemu-img convert -f raw -O qcow2 image.raw debian-image-${{ matrix.architecture }}.qcow2
+    # - name: Convert Image
+    #   run: qemu-img convert -f raw -O qcow2 image.raw debian-image-${{ matrix.architecture }}.qcow2
 
     - name: Upload Image
       uses: actions/upload-artifact@v3
       with:
         name: debian-image-${{ matrix.architecture }}
-        path: debian-image-${{ matrix.architecture }}.qcow2
+        path: image.raw
